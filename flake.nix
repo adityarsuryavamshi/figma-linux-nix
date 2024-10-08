@@ -20,6 +20,8 @@
 
         npmDepsHash = "sha256-FqgcG52Nkj0wlwsHwIWTXNuIeAs7b+TPkHcg7m5D2og=";
 
+        nativeBuildInputs = [ pkgs.copyDesktopItems ];
+
         dontNpmBuild = true;
 
         buildPhase = ''
@@ -40,13 +42,25 @@
           cp package.json $out/package.json
           cp -r dist/* $out
 
-          echo "${pkgs.electron}/bin/electron $out/main/main.js --enable-features=UseOzonePlatform --ozone-platform=wayland" > $out/bin/figma-linux-hf
+          echo "${pkgs.electron}/bin/electron $out/main/main.js --enable-features=UseOzonePlatform --ozone-platform=wayland \"\$@\""  > $out/bin/figma-linux-hf
           chmod +x $out/bin/figma-linux-hf
 
           runHook postInstall
         '';
 
         env = { ELECTRON_SKIP_BINARY_DOWNLOAD = 1; };
+
+        desktopItems = [
+          (pkgs.makeDesktopItem {
+            name = "figma-linux-hf";
+            desktopName = "Figma Linux HF";
+            exec = "figma-linux-hf %U";
+            terminal = false;
+            startupWMClass = "figma-linux-hf";
+            type = "Application";
+            mimeTypes = [ "x-scheme-handler/figma" "application/figma" ];
+          })
+        ];
 
       };
 
